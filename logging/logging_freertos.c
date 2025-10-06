@@ -46,7 +46,7 @@ void vLoggingPrintf( const char * pcFormat,
 
     fflush( stdout );
 
-    xSemaphoreTake( xStdioMutex, portMAX_DELAY );
+    xSemaphoreGive( xStdioMutex, portMAX_DELAY );
 
     va_end( arg );
 }
