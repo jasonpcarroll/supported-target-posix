@@ -4,9 +4,14 @@
 
 /* FreeRTOS-Kernel includes. */
 #include "FreeRTOS.h"
+#include "task.h"
 
 /* Logging includes. */
 #include "logging.h"
+
+void vLoggingInit( void )
+{
+}
 
 void vLoggingPrintf( const char * pcFormat,
                      ... )
