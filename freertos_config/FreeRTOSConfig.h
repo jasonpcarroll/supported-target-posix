@@ -42,7 +42,7 @@
 #define configUSE_IDLE_HOOK                        1
 #define configUSE_TICK_HOOK                        1
 #define configUSE_DAEMON_TASK_STARTUP_HOOK         1
-#define configTICK_RATE_HZ                         ( 1000 )                  /* In this non-real time simulated environment the tick frequency has to be at least a multiple of the Win32 tick frequency, and therefore very slow. */
+#define configTICK_RATE_HZ                         ( 1000 )              /* In this non-real time simulated environment the tick frequency has to be at least a multiple of the Win32 tick frequency, and therefore very slow. */
 #define configMINIMAL_STACK_SIZE                   ( PTHREAD_STACK_MIN ) /* The stack size being passed is equal to the minimum stack size needed by pthread_create(). */
 #define configTOTAL_HEAP_SIZE                      ( ( size_t ) ( 65 * 1024 ) )
 #define configMAX_TASK_NAME_LEN                    ( 12 )
@@ -140,13 +140,13 @@ extern void vAssertCalled( const char * const pcFileName,
 /* projCOVERAGE_TEST should be defined on the command line so this file can be
  * used with multiple project configurations.  If it is
  */
-#ifndef projCOVERAGE_TEST
-    #error projCOVERAGE_TEST should be defined to 1 or 0 on the command line.
-#endif
-
-#ifndef projENABLE_TRACING
-    #error projENABLE_TRACING should be defined to 1 or 0 on the command line.
-#endif
+//#ifndef projCOVERAGE_TEST
+//    #error projCOVERAGE_TEST should be defined to 1 or 0 on the command line.
+//#endif
+//
+//#ifndef projENABLE_TRACING
+//    #error projENABLE_TRACING should be defined to 1 or 0 on the command line.
+//#endif
 
 #if ( projCOVERAGE_TEST == 1 )
 
@@ -174,7 +174,7 @@ extern void vAssertCalled( const char * const pcFileName,
     #define configUSE_MALLOC_FAILED_HOOK    1
 
 /* Include the FreeRTOS+Trace FreeRTOS trace macro definitions. */
-    #if( projENABLE_TRACING == 1 )
+    #if ( projENABLE_TRACING == 1 )
         #include "trcRecorder.h"
     #endif /* if ( projENABLE_TRACING == 1 ) */
 #endif /* if ( projCOVERAGE_TEST == 1 ) */
