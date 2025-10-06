@@ -1,5 +1,6 @@
 /* Standard includes. */
 #include <stdio.h>
+#include <stdarg.h>
 
 /* FreeRTOS-Kernel includes. */
 #include "FreeRTOS.h"
