@@ -4,34 +4,9 @@
 
 /* FreeRTOS-Kernel includes. */
 #include "FreeRTOS.h"
-#include "semphr.h"
 
 /* Logging includes. */
 #include "logging.h"
-
-#if ( configUSE_MUTEXES == 0 )
-    #error Logging relies on mutexes being available for thread-safety.
-#endif
-
-#if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-
-    static SemaphoreHandle_t xStdioMutex;
-    static StaticSemaphore_t xStdioMutexBuffer;
-
-#endif
-
-void vLoggingInit( void )
-{
-    #if ( configSUPPORT_STATIC_ALLOCATION == 1 )
-    {
-        xStdioMutex = xSemaphoreCreateMutexStatic( &xStdioMutexBuffer );
-    }
-    #else /* if( configSUPPORT_STATIC_ALLOCATION == 1 ) */
-    {
-        xStdioMutex = xSemaphoreCreateMutex();
-    }
-    #endif /* if( configSUPPORT_STATIC_ALLOCATION == 1 ) */
-}
 
 void vLoggingPrintf( const char * pcFormat,
                      ... )
@@ -40,13 +15,13 @@ void vLoggingPrintf( const char * pcFormat,
 
     va_start( arg, pcFormat );
 
-    xSemaphoreTake( xStdioMutex, portMAX_DELAY );
+    taskENTER_CRITICAL();
+    {
+        vprintf( pcFormat, arg );
 
-    vprintf( pcFormat, arg );
-
-    fflush( stdout );
-
-    xSemaphoreGive( xStdioMutex );
+        fflush( stdout );
+    }
+    taskEXIT_CRITICAL();
 
     va_end( arg );
 }
