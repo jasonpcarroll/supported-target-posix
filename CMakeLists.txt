@@ -56,6 +56,6 @@ function(add_executable target)
 
   set(BUILD_TARGET ${target})
 
-  configure_file("${VSCODE_TASKS_IN}" "${CMAKE_SOURCE_DIR}/.vscode/tasks.json")
+  configure_file("${VSCODE_TASKS_IN}" "${CMAKE_SOURCE_DIR}/.vscode/tasks.json" @ONLY) 
 
 endfunction()
