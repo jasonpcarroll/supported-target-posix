@@ -1,0 +1,5 @@
+set_property(GLOBAL PROPERTY VSCODE_LAUNCH_IN_PROP "${CMAKE_CURRENT_LIST_DIR}/launch.json.in")
+set_property(GLOBAL PROPERTY VSCODE_TASKS_IN_PROP "${CMAKE_CURRENT_LIST_DIR}/tasks.json.in")
+
+
+file(COPY "${CMAKE_CURRENT_LIST_DIR}/extensions.json" DESTINATION "${CMAKE_SOURCE_DIR}/.vscode/")
