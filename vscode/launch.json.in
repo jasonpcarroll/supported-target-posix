@@ -5,11 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "gdb",
-            "request": "launch",
             "name": "Posix Debug @EXECUTABLE_NAME@",
+            "type": "cppdbg",
+            "request": "launch",
             "program": "@EXECUTABLE_PATH@",
-            "gdb": "@CMAKE_C_DEBUGGER@",
+            "args": [],
+            "stopAtEntry": true,
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "@CMAKE_C_DEBUGGER@",
             "preLaunchTask": "CMake: build"
         }
     ]
