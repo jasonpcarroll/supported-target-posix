@@ -12,7 +12,7 @@ add_subdirectory(logging)
 
 # FreeRTOS configuration
 
-add_subdirectory(freertos_config)
+add_subdirectory(freertos)
 
 # VS Code Integration
 
