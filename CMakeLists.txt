@@ -18,7 +18,7 @@ add_subdirectory(freertos)
 
 add_subdirectory(coremqtt)
 
-target_link_libaries(core_mqtt_config PUBLIC logging_freertos)
+target_link_libraries(core_mqtt_config PUBLIC logging_freertos)
 
 # VS Code Integration
 
