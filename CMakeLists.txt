@@ -31,6 +31,10 @@ function(add_executable target)
   # Forward all arguments to the CMake add_executable
   _add_executable(${target} ${ARGN})
 
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads REQUIRED)
+  target_link_libraries(${target} PRIVATE Threads::Threads)
+
   # Add debug launch command for each executable
 
   add_custom_target(launch_debug_${target} "${CMAKE_C_DEBUGGER}"
@@ -62,6 +66,7 @@ function(add_executable target)
 
   set(BUILD_TARGET ${target})
 
-  configure_file("${VSCODE_TASKS_IN}" "${CMAKE_SOURCE_DIR}/.vscode/tasks.json" @ONLY) 
+  configure_file("${VSCODE_TASKS_IN}" "${CMAKE_SOURCE_DIR}/.vscode/tasks.json"
+                 @ONLY)
 
 endfunction()
