@@ -4,7 +4,7 @@
 #include <poll.h>
 
 static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
-                                           const TransportCredentials_t * pCredentials )
+                                             const TransportCredentials_t * pCredentials )
 {
     TransportStatus_t xReturnStatus = TRANSPORT_SUCCESS;
     SSL_CTX * pSslContext = SSL_CTX_new( TLS_client_method() );
@@ -15,7 +15,7 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
         xReturnStatus = TRANSPORT_INSUFFICIENT_MEMORY;
     }
 
-    if( xReturnStatus == TRANSPORT_SUCCESS && pCredentials->pRootCa != NULL )
+    if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pCredentials->pRootCa != NULL ) )
     {
         if( SSL_CTX_load_verify_locations( pSslContext, pCredentials->pRootCa, NULL ) != 1 )
         {
@@ -23,18 +23,18 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
         }
     }
 
-    if( xReturnStatus == TRANSPORT_SUCCESS && pCredentials->pClientCert != NULL && pCredentials->pPrivateKey != NULL )
+    if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pCredentials->pClientCert != NULL ) && ( pCredentials->pPrivateKey != NULL ) )
     {
-        if( SSL_CTX_use_certificate_file( pSslContext, pCredentials->pClientCert, SSL_FILETYPE_PEM ) != 1 ||
-            SSL_CTX_use_PrivateKey_file( pSslContext, pCredentials->pPrivateKey, SSL_FILETYPE_PEM ) != 1 )
+        if( ( SSL_CTX_use_certificate_file( pSslContext, pCredentials->pClientCert, SSL_FILETYPE_PEM ) != 1 ) ||
+            ( SSL_CTX_use_PrivateKey_file( pSslContext, pCredentials->pPrivateKey, SSL_FILETYPE_PEM ) != 1 ) )
         {
             xReturnStatus = TRANSPORT_INVALID_CREDENTIALS;
         }
     }
 
-    if( xReturnStatus == TRANSPORT_SUCCESS && pCredentials->pAlpnProtos != NULL && pCredentials->alpnProtosLen > 0 )
+    if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pCredentials->pAlpnProtos != NULL ) && ( pCredentials->alpnProtosLen > 0 ) )
     {
-        if( SSL_CTX_set_alpn_protos( pSslContext, (const unsigned char *)pCredentials->pAlpnProtos, pCredentials->alpnProtosLen ) != 0 )
+        if( SSL_CTX_set_alpn_protos( pSslContext, ( const unsigned char * ) pCredentials->pAlpnProtos, pCredentials->alpnProtosLen ) != 0 )
         {
             xReturnStatus = TRANSPORT_INVALID_CREDENTIALS;
         }
@@ -43,6 +43,7 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
     if( xReturnStatus == TRANSPORT_SUCCESS )
     {
         pSsl = SSL_new( pSslContext );
+
         if( pSsl == NULL )
         {
             xReturnStatus = TRANSPORT_INSUFFICIENT_MEMORY;
@@ -54,7 +55,7 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
         SSL_CTX_free( pSslContext );
     }
 
-    if( xReturnStatus == TRANSPORT_SUCCESS && pCredentials->sniHostName != NULL )
+    if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pCredentials->sniHostName != NULL ) )
     {
         SSL_set_tlsext_host_name( pSsl, pCredentials->sniHostName );
     }
@@ -62,6 +63,7 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
     if( xReturnStatus == TRANSPORT_SUCCESS )
     {
         SSL_set_fd( pSsl, pNetworkContext->socketDescriptor );
+
         if( SSL_connect( pSsl ) != 1 )
         {
             xReturnStatus = TRANSPORT_HANDSHAKE_FAILED;
@@ -81,15 +83,15 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
 }
 
 TransportStatus_t Transport_Connect( NetworkContext_t * pNetworkContext,
-                                    const ServerInfo_t * pServerInfo,
-                                    const TransportCredentials_t * pCredentials,
-                                    uint32_t sendTimeoutMs,
-                                    uint32_t recvTimeoutMs )
+                                     const ServerInfo_t * pServerInfo,
+                                     const TransportCredentials_t * pCredentials,
+                                     uint32_t sendTimeoutMs,
+                                     uint32_t recvTimeoutMs )
 {
     TransportStatus_t xReturnStatus = TRANSPORT_SUCCESS;
     SocketStatus_t socketStatus;
 
-    if( pNetworkContext == NULL || pServerInfo == NULL )
+    if( ( pNetworkContext == NULL ) || ( pServerInfo == NULL ) )
     {
         xReturnStatus = TRANSPORT_INVALID_PARAMETER;
     }
@@ -98,7 +100,7 @@ TransportStatus_t Transport_Connect( NetworkContext_t * pNetworkContext,
     {
         memset( pNetworkContext, 0, sizeof( NetworkContext_t ) );
         socketStatus = Sockets_Connect( &pNetworkContext->socketDescriptor,
-                                       pServerInfo, sendTimeoutMs, recvTimeoutMs );
+                                        pServerInfo, sendTimeoutMs, recvTimeoutMs );
 
         if( socketStatus != SOCKETS_SUCCESS )
         {
@@ -106,9 +108,10 @@ TransportStatus_t Transport_Connect( NetworkContext_t * pNetworkContext,
         }
     }
 
-    if( xReturnStatus == TRANSPORT_SUCCESS && pCredentials != NULL )
+    if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pCredentials != NULL ) )
     {
         xReturnStatus = setupTlsConnection( pNetworkContext, pCredentials );
+
         if( xReturnStatus != TRANSPORT_SUCCESS )
         {
             Sockets_Disconnect( pNetworkContext->socketDescriptor );
@@ -127,7 +130,7 @@ TransportStatus_t Transport_Disconnect( const NetworkContext_t * pNetworkContext
         xReturnStatus = TRANSPORT_INVALID_PARAMETER;
     }
 
-    if( xReturnStatus == TRANSPORT_SUCCESS && pNetworkContext->pSsl != NULL )
+    if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pNetworkContext->pSsl != NULL ) )
     {
         SSL_shutdown( pNetworkContext->pSsl );
         SSL_free( pNetworkContext->pSsl );
@@ -141,14 +144,16 @@ TransportStatus_t Transport_Disconnect( const NetworkContext_t * pNetworkContext
     return xReturnStatus;
 }
 
-int32_t Transport_Recv( NetworkContext_t * pNetworkContext, void * pBuffer, size_t bytesToRecv )
+int32_t Transport_Recv( NetworkContext_t * pNetworkContext,
+                        void * pBuffer,
+                        size_t bytesToRecv )
 {
     int32_t bytesReceived = -1;
-    
+
     if( pNetworkContext->pSsl != NULL )
     {
         int32_t shouldRead = 0;
-        
+
         if( SSL_pending( pNetworkContext->pSsl ) > 0 )
         {
             shouldRead = 1;
@@ -159,8 +164,9 @@ int32_t Transport_Recv( NetworkContext_t * pNetworkContext, void * pBuffer, size
             pollFds.events = POLLIN | POLLPRI;
             pollFds.revents = 0;
             pollFds.fd = pNetworkContext->socketDescriptor;
-            
+
             int32_t pollStatus = poll( &pollFds, 1, 0 );
+
             if( pollStatus > 0 )
             {
                 shouldRead = 1;
@@ -169,8 +175,12 @@ int32_t Transport_Recv( NetworkContext_t * pNetworkContext, void * pBuffer, size
             {
                 bytesReceived = -1;
             }
+            else
+            {
+                bytesReceived = 0;
+            }
         }
-        
+
         if( shouldRead )
         {
             bytesReceived = SSL_read( pNetworkContext->pSsl, pBuffer, bytesToRecv );
@@ -182,12 +192,13 @@ int32_t Transport_Recv( NetworkContext_t * pNetworkContext, void * pBuffer, size
         pollFds.events = POLLIN | POLLPRI;
         pollFds.revents = 0;
         pollFds.fd = pNetworkContext->socketDescriptor;
-        
+
         int32_t pollStatus = poll( &pollFds, 1, 0 );
-        
+
         if( pollStatus > 0 )
         {
             bytesReceived = recv( pNetworkContext->socketDescriptor, pBuffer, bytesToRecv, 0 );
+
             if( bytesReceived == 0 )
             {
                 bytesReceived = -1;
@@ -197,22 +208,28 @@ int32_t Transport_Recv( NetworkContext_t * pNetworkContext, void * pBuffer, size
         {
             bytesReceived = -1;
         }
+        else
+        {
+            bytesReceived = 0;
+        }
     }
-    
+
     return bytesReceived;
 }
 
-int32_t Transport_Send( NetworkContext_t * pNetworkContext, const void * pBuffer, size_t bytesToSend )
+int32_t Transport_Send( NetworkContext_t * pNetworkContext,
+                        const void * pBuffer,
+                        size_t bytesToSend )
 {
     int32_t bytesSent = -1;
     struct pollfd pollFds;
-    
+
     pollFds.events = POLLOUT;
     pollFds.revents = 0;
     pollFds.fd = pNetworkContext->socketDescriptor;
-    
+
     int32_t pollStatus = poll( &pollFds, 1, 0 );
-    
+
     if( pollStatus > 0 )
     {
         if( pNetworkContext->pSsl != NULL )
@@ -222,6 +239,7 @@ int32_t Transport_Send( NetworkContext_t * pNetworkContext, const void * pBuffer
         else
         {
             bytesSent = send( pNetworkContext->socketDescriptor, pBuffer, bytesToSend, 0 );
+
             if( bytesSent == 0 )
             {
                 bytesSent = -1;
@@ -232,6 +250,6 @@ int32_t Transport_Send( NetworkContext_t * pNetworkContext, const void * pBuffer
     {
         bytesSent = -1;
     }
-    
+
     return bytesSent;
 }
