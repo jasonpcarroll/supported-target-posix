@@ -1,5 +1,7 @@
 #include "transport.h"
 #include <string.h>
+#include <sys/socket.h>
+#include <poll.h>
 
 static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
                                            const TransportCredentials_t * pCredentials )
@@ -141,18 +143,95 @@ TransportStatus_t Transport_Disconnect( const NetworkContext_t * pNetworkContext
 
 int32_t Transport_Recv( NetworkContext_t * pNetworkContext, void * pBuffer, size_t bytesToRecv )
 {
+    int32_t bytesReceived = -1;
+    
     if( pNetworkContext->pSsl != NULL )
     {
-        return SSL_read( pNetworkContext->pSsl, pBuffer, bytesToRecv );
+        int32_t shouldRead = 0;
+        
+        if( SSL_pending( pNetworkContext->pSsl ) > 0 )
+        {
+            shouldRead = 1;
+        }
+        else
+        {
+            struct pollfd pollFds;
+            pollFds.events = POLLIN | POLLPRI;
+            pollFds.revents = 0;
+            pollFds.fd = pNetworkContext->socketDescriptor;
+            
+            int32_t pollStatus = poll( &pollFds, 1, 0 );
+            if( pollStatus > 0 )
+            {
+                shouldRead = 1;
+            }
+            else if( pollStatus < 0 )
+            {
+                bytesReceived = -1;
+            }
+        }
+        
+        if( shouldRead )
+        {
+            bytesReceived = SSL_read( pNetworkContext->pSsl, pBuffer, bytesToRecv );
+        }
     }
-    return Sockets_Recv( pNetworkContext->socketDescriptor, pBuffer, bytesToRecv );
+    else
+    {
+        struct pollfd pollFds;
+        pollFds.events = POLLIN | POLLPRI;
+        pollFds.revents = 0;
+        pollFds.fd = pNetworkContext->socketDescriptor;
+        
+        int32_t pollStatus = poll( &pollFds, 1, 0 );
+        
+        if( pollStatus > 0 )
+        {
+            bytesReceived = recv( pNetworkContext->socketDescriptor, pBuffer, bytesToRecv, 0 );
+            if( bytesReceived == 0 )
+            {
+                bytesReceived = -1;
+            }
+        }
+        else if( pollStatus < 0 )
+        {
+            bytesReceived = -1;
+        }
+    }
+    
+    return bytesReceived;
 }
 
 int32_t Transport_Send( NetworkContext_t * pNetworkContext, const void * pBuffer, size_t bytesToSend )
 {
-    if( pNetworkContext->pSsl != NULL )
+    int32_t bytesSent = -1;
+    struct pollfd pollFds;
+    
+    pollFds.events = POLLOUT;
+    pollFds.revents = 0;
+    pollFds.fd = pNetworkContext->socketDescriptor;
+    
+    int32_t pollStatus = poll( &pollFds, 1, 0 );
+    
+    if( pollStatus > 0 )
     {
-        return SSL_write( pNetworkContext->pSsl, pBuffer, bytesToSend );
+        if( pNetworkContext->pSsl != NULL )
+        {
+            bytesSent = SSL_write( pNetworkContext->pSsl, pBuffer, bytesToSend );
+        }
+        else
+        {
+            bytesSent = send( pNetworkContext->socketDescriptor, pBuffer, bytesToSend, 0 );
+            if( bytesSent == 0 )
+            {
+                bytesSent = -1;
+            }
+        }
     }
-    return Sockets_Send( pNetworkContext->socketDescriptor, pBuffer, bytesToSend );
+    else if( pollStatus < 0 )
+    {
+        bytesSent = -1;
+    }
+    
+    return bytesSent;
 }
