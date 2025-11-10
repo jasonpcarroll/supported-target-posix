@@ -2,6 +2,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <poll.h>
+#include <fcntl.h>
 #include <openssl/err.h>
 
 static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
