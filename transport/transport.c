@@ -65,6 +65,10 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
     {
         SSL_set_fd( pSsl, pNetworkContext->socketDescriptor );
 
+        // Check if socket is blocking or non-blocking
+        int flags = fcntl( pNetworkContext->socketDescriptor, F_GETFL, 0 );
+        LogError( ( "Socket flags: 0x%x, O_NONBLOCK=%s\n", flags, (flags & O_NONBLOCK) ? "YES" : "NO" ) );
+
         int connectResult = SSL_connect( pSsl );
 
         if( connectResult != 1 )
