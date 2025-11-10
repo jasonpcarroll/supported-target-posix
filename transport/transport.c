@@ -157,13 +157,18 @@ TransportStatus_t Transport_Disconnect( const NetworkContext_t * pNetworkContext
 
     if( ( xReturnStatus == TRANSPORT_SUCCESS ) && ( pNetworkContext->pSsl != NULL ) )
     {
-        SSL_shutdown( pNetworkContext->pSsl );
+        LogDebug( ( "Starting SSL_shutdown\n" ) );
+        int shutdownResult = SSL_shutdown( pNetworkContext->pSsl );
+        LogDebug( ( "SSL_shutdown returned: %d\n", shutdownResult ) );
         SSL_free( pNetworkContext->pSsl );
+        LogDebug( ( "SSL_free completed\n" ) );
     }
 
     if( xReturnStatus == TRANSPORT_SUCCESS )
     {
+        LogDebug( ( "Starting Sockets_Disconnect\n" ) );
         Sockets_Disconnect( pNetworkContext->socketDescriptor );
+        LogDebug( ( "Sockets_Disconnect completed\n" ) );
     }
 
     return xReturnStatus;
