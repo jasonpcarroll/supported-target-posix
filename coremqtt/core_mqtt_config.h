@@ -38,4 +38,6 @@ extern void vLoggingPrintf( const char * pcFormatString,
 
 #include "logging_stack.h"
 
-#endif
+#define MQTT_MAX_CONNACK_RECEIVE_RETRY_COUNT    30
+
+#endif /* ifndef CORE_MQTT_CONFIG_H */
