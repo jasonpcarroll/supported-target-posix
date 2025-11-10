@@ -80,6 +80,10 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
             {
                 LogError( ( "System call error - errno: %d (%s)\n", errno, strerror(errno) ) );
             }
+            else if( sslError == SSL_ERROR_WANT_READ )
+            {
+                LogError( ( "SSL wants to read but no data available - possible connection timeout\n" ) );
+            }
             
             xReturnStatus = TRANSPORT_HANDSHAKE_FAILED;
         }
