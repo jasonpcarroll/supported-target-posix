@@ -64,8 +64,16 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
     {
         SSL_set_fd( pSsl, pNetworkContext->socketDescriptor );
 
-        if( SSL_connect( pSsl ) != 1 )
+        int connectResult = SSL_connect( pSsl );
+
+        if( connectResult != 1 )
         {
+            int sslError = SSL_get_error( pSsl, connectResult );
+            unsigned long errCode = ERR_get_error();
+            char errBuf[ 256 ];
+            ERR_error_string_n( errCode, errBuf, sizeof( errBuf ) );
+
+            LogError( ( "TLS handshake failed - SSL_get_error: %d, OpenSSL error: %s\n", sslError, errBuf ) );
             xReturnStatus = TRANSPORT_HANDSHAKE_FAILED;
         }
     }
