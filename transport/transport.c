@@ -66,9 +66,9 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
     {
         SSL_set_fd( pSsl, pNetworkContext->socketDescriptor );
 
-        // Check if socket is blocking or non-blocking
+        /* Check if socket is blocking or non-blocking */
         int flags = fcntl( pNetworkContext->socketDescriptor, F_GETFL, 0 );
-        LogError( ( "Socket flags: 0x%x, O_NONBLOCK=%s\n", flags, (flags & O_NONBLOCK) ? "YES" : "NO" ) );
+        LogError( ( "Socket flags: 0x%x, O_NONBLOCK=%s\n", flags, ( flags & O_NONBLOCK ) ? "YES" : "NO" ) );
 
         int connectResult = SSL_connect( pSsl );
 
@@ -81,16 +81,16 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
 
             LogError( ( "TLS handshake failed - SSL_get_error: %d, OpenSSL error: %s\n", sslError, errBuf ) );
             LogError( ( "SSL_connect returned: %d\n", connectResult ) );
-            
+
             if( sslError == SSL_ERROR_SYSCALL )
             {
-                LogError( ( "System call error - errno: %d (%s)\n", errno, strerror(errno) ) );
+                LogError( ( "System call error - errno: %d (%s)\n", errno, strerror( errno ) ) );
             }
             else if( sslError == SSL_ERROR_WANT_READ )
             {
                 LogError( ( "SSL wants to read but no data available - possible connection timeout\n" ) );
             }
-            
+
             xReturnStatus = TRANSPORT_HANDSHAKE_FAILED;
         }
     }
@@ -105,6 +105,11 @@ static TransportStatus_t setupTlsConnection( NetworkContext_t * pNetworkContext,
     }
 
     return xReturnStatus;
+}
+
+TransportStatus_t Transport_Init( void )
+{
+    return TRANSPORT_SUCCESS;
 }
 
 TransportStatus_t Transport_Connect( NetworkContext_t * pNetworkContext,
